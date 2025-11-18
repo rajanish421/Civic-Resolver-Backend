@@ -13,7 +13,7 @@ const departmentSchema = new mongoose.Schema({
         type:String,
         required:true,  
     },
-},{timestamps:true});
+},);
 
 const Department = mongoose.model("Department", departmentSchema);
 module.exports = Department;    
