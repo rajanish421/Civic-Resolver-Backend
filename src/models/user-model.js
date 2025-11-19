@@ -10,12 +10,11 @@ const userSchema = new mongoose.Schema({
         required:true,
         unique:true
     },
-    aadharNumberHash:{
+    aadharNumber:{
         type:String,
-        required:true,
-        unique:true,
+        default:""
     },
-    passwordHash:{
+    password:{
         type:String,
         required:true 
     },

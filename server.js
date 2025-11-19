@@ -1,14 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const authRoutes = require('./src/api/v1/routes/auth-routes');
 require('dotenv').config();
 
-
-const app = express();
 const PORT = process.env.PORT || 3000;
+const app = express();
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Civic Resolver Backend is running');
-});
+app.use("/api/v1/user",authRoutes);
+
+
 
 
 // Database connection
