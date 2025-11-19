@@ -1,90 +1,91 @@
-const express = require('express');
-require('dotenv').config();
-const twilio = require('twilio');
-const OTP = require('../models/otp-model');
+const express = require("express");
+require("dotenv").config();
+const twilio = require("twilio");
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhone = process.env.TWILIO_PHONE;
+const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
 const client = twilio(accountSid, authToken);
 
-// send OTP controller
+// =============================
+// SEND OTP (using Verify API)
+// =============================
 const sendOtpController = async (req, res) => {
     try {
         const { mobileNumber } = req.body;
 
         if (!mobileNumber) {
-            return res.status(400).json({
-                message: 'Mobile number is required'
-            });
+            return res.status(400).json({ message: "Mobile number is required" });
         }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Twilio verify send OTP
+        const response = await client.verify.v2
+            .services(verifyServiceSid)
+            .verifications
+            .create({
+                to: mobileNumber.startsWith("+") ? mobileNumber : `+91${mobileNumber}`,
+                channel: "sms"
+            });
 
-        // Store OTP in database
-        console.log(mobileNumber, otp);
-        await OTP.findOneAndUpdate(
-            { mobileNumber },
-            { otp, createdAt: new Date() },
-            { upsert: true, new: true }
-        );  
-
-        // send OTP via Twilio
-        await client.messages.create({
-            body: `Your OTP code is ${otp}`,
-            from: twilioPhone,
-            to: mobileNumber
-        });
-
-        res.status(200).json({
-            status: 'true',
-            message: 'OTP sent successfully',
-            otp // In production, do not send OTP in response
+        return res.status(200).json({
+            status: true,
+            message: "OTP sent successfully",
+            // verification_sid: response.sid   // optional debug
         });
 
     } catch (error) {
-        console.error('Send OTP Error:', error);
-        res.status(500).json({
-            message: 'Failed to send OTP'
+        console.error("Send OTP Error:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Failed to send OTP",
+            error: error.message
         });
     }
 };
 
-// verify OTP controller
-
+// =============================
+// VERIFY OTP (using Verify API)
+// =============================
 const verifyOtpController = async (req, res) => {
     try {
         const { mobileNumber, otp } = req.body;
 
         if (!mobileNumber || !otp) {
             return res.status(400).json({
-                message: 'Mobile number and OTP are required'
+                message: "Mobile number and OTP are required"
             });
         }
 
-        const record = await OTP.findOne({ mobileNumber });
+        // Verify OTP using Twilio Verify
+        const verification = await client.verify.v2
+            .services(verifyServiceSid)
+            .verificationChecks
+            .create({
+                to: mobileNumber.startsWith("+") ? mobileNumber : `+91${mobileNumber}`,
+                code: otp
+            });
 
-        if (!record || record.otp !== otp) {
+        if (verification.status === "approved") {
+            return res.status(200).json({
+                status: true,
+                message: "OTP verified successfully"
+            });
+        } else {
             return res.status(400).json({
-                message: 'Invalid OTP or Expired'
+                status: false,
+                message: "Invalid OTP / Expired OTP"
             });
         }
-
-        // OTP is valid
-        // await otpModel.deleteOne({ mobileNumber }); // Remove used OTP
-
-        res.status(200).json({
-            status: 'true',
-            message: 'OTP verified successfully'
-        });
 
     } catch (error) {
-        console.error('Verify OTP Error:', error);
-        res.status(500).json({
-            message: 'Failed to verify OTP'
+        console.error("Verify OTP Error:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Failed to verify OTP",
+            error: error.message
         });
     }
 };
 
-module.exports = { sendOtpController  , verifyOtpController };
+module.exports = { sendOtpController, verifyOtpController };
