@@ -70,7 +70,55 @@ const registerController = async(req , res)=>{
 };
 
 
-module.exports = {registerController};
+// login controller
+
+const loginController = async(req , res)=>{
+    try {
+        const { mobileNumber , password } = req.body;
+
+        if(!mobileNumber || !password){
+            return res.status(400).json({
+                message:'All fields are required'
+            });
+        }
+
+        const user = await User.findOne({mobileNumber});
+
+        if(!user){
+            return res.status(404).json({
+                message:'User not found'
+            });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password , user.password);
+        
+        if(!isPasswordValid){
+            return res.status(401).json({
+                message:'Invalid credentials'
+            });
+        }   
+
+        const token  = generateToken(user);
+
+        sendTokenToCookie(res , token);
+        
+        res.status(200).json({
+            status:'true',
+            message:'Login successful',
+            user:user,
+        });     
+
+    } catch (error) {
+        console.error('Login Controller Error:', error);
+        res.status(500).json({
+            status:'false',
+            message:'Internal Server Error',
+            error: error.message
+        }); 
+    }
+};
+
+module.exports = {registerController , loginController};
 
 
 

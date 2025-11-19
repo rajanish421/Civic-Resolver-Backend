@@ -1,4 +1,3 @@
-const express = require("express");
 require("dotenv").config();
 const twilio = require("twilio");
 
@@ -8,9 +7,8 @@ const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
 const client = twilio(accountSid, authToken);
 
-// =============================
+
 // SEND OTP (using Verify API)
-// =============================
 const sendOtpController = async (req, res) => {
     try {
         const { mobileNumber } = req.body;
@@ -44,9 +42,7 @@ const sendOtpController = async (req, res) => {
     }
 };
 
-// =============================
 // VERIFY OTP (using Verify API)
-// =============================
 const verifyOtpController = async (req, res) => {
     try {
         const { mobileNumber, otp } = req.body;

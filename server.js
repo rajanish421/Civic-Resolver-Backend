@@ -8,9 +8,15 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
+
+
+
+// All Routes
 app.use("/api/v1/user",authRoutes);
 
 app.use("/api/v1/user",otpRoutes);
+
+
 
 
 // Database connection
