@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const authRoutes = require('./src/api/v1/routes/auth-routes');
 const otpRoutes = require('./src/api/v1/routes/otp-routes');
 const cors = require('cors');
+const { reportRoute } = require('./src/api/v1/routes/report-routes');
+const cookieParser = require('cookie-parser');
+
+
 
 // Middleware
 
@@ -12,6 +16,7 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 
 
 
@@ -21,7 +26,9 @@ app.use("/api/v1/user",authRoutes);
 
 app.use("/api/v1/user",otpRoutes);
 
+// Report Routes
 
+app.use("/api/v1/user",reportRoute);
 
 
 // Database connection

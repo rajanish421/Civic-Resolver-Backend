@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
-   ticket_id: {
-    type: String,
-    required: true,
-    unique: true
-  },
 
   citizen_id: {
     type: mongoose.Schema.Types.ObjectId,

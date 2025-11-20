@@ -30,14 +30,14 @@ const generateToken = (user)=>{
 
 const sendTokenToCookie = (res , token)=>{
     try {
-            const cookieOptions = {
+        const cookieOptions = {
         httpOnly:true,
         secure:process.env.NODE_ENV === 'production', // set secure flag in production
         sameSite:'Strict',
         maxAge:7 * 24 * 60 * 60 * 1000 // 7 days
     };
 
-    res.cookie('token' , token , cookieOptions);
+    res.cookie('Token' , token , cookieOptions);
     } catch (error) {
         console.error('Cookie Setting Error:', error);
         throw new Error('Setting Cookie Failed');
